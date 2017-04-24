@@ -42,8 +42,8 @@
 #define RED		2
 #define YELLOW  3
 
+unsigned long GetTimer(void);
 void ResetTimer(void);
-long GetTimerValue(void);
 
 /* Init function Processor will be initalized to work correctly */
 void Init(void);
@@ -89,8 +89,8 @@ unsigned char PollSwitch (void);
 void StartSwitch(void);
 void StopSwitch(void);
 
-/* Sleep function using 36kHz counter */
-void Sleep(unsigned char timer36kHz);
+/* Sleep function using 72kHz counter */
+void Sleep(unsigned char timer72kHz);
 /* ----------- END ------------ */
 
 

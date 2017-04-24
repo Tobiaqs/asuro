@@ -27,21 +27,23 @@
 ***************************************************************************/
 
 #include "asuro.h"
-volatile unsigned long count72kHz;
+volatile unsigned char count72kHz;
+volatile unsigned long timer72kHz;
 
 /* uses timer2 (36kHz for IR communication */
 /* counts falling and rising edge => 36kHz*2 = 72kHz */
 ISR (TIMER2_COMP_vect)
 {
 	count72kHz ++;
+	timer72kHz ++;
+}
+
+unsigned long GetTimer (void) {
+	return timer72kHz;
 }
 
 void ResetTimer (void) {
-	count72kHz = 0;
-}
-
-long GetTimerValue (void) {
-	return count72kHz;
+	timer72kHz = 0;
 }
 
 /* Init function Processor will be initalized to work correctly */
