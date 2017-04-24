@@ -1,0 +1,7 @@
+*.o
+*.elf
+*.lst
+*.d
+*.eep
+*.lss
+*.map
