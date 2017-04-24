@@ -24,6 +24,10 @@
 // speed modifications are enabled
 #define		ODO_WAITPULSES	25
 
+#define		TICKS_WAIT		18000
+#define		TICKS_REVERSE	72000
+#define		TICKS_TURN		60000
+
 typedef enum {false=0, true=1} bool;
 
 void transition(unsigned char newState);

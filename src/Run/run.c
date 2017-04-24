@@ -22,33 +22,38 @@ unsigned int odometry[2];
 
 int main(void)
 {
-	// The 
+	// Counts loops in a row, in which there is a collision detected
 	unsigned char collisionCounter = 0;
 
+	// Init device
 	Init();
 
+	// Reset the secondary timer
 	ResetTimer();
 
+	// Activate the first state
 	transition(STATE_DRIVE);
 
+	// The main loop of the program
 	while (TRUE) {
-		if (PollSwitch() > 0) {
-			if (collisionCounter < 255)
-				collisionCounter ++;
-		} else
-			collisionCounter = 0;
-
 		switch (state) {
 			case STATE_DRIVE:
 				updateMotorSpeed();
 
+				if (PollSwitch() > 0) {
+					if (collisionCounter < 255)
+						collisionCounter ++;
+				} else
+					collisionCounter = 0;
+
 				if (collisionCounter >= 5) {
+					collisionCounter = 0;
 					transition(STATE_WAIT1);
 				}
 				break;
 
 			case STATE_WAIT1:
-				if (GetTimer() >= 18000) {
+				if (GetTimer() >= TICKS_WAIT) {
 					transition(STATE_REVERSE);
 				}
 				break;
@@ -56,25 +61,25 @@ int main(void)
 			case STATE_REVERSE:
 				updateMotorSpeed();
 
-				if (GetTimer() >= 72000) {
+				if (GetTimer() >= TICKS_REVERSE) {
 					transition(STATE_WAIT2);
 				}
 				break;
 
 			case STATE_WAIT2:
-				if (GetTimer() >= 18000) {
+				if (GetTimer() >= TICKS_WAIT) {
 					transition(STATE_TURN);
 				}
 				break;
 
 			case STATE_TURN:
-				if (GetTimer() >= 60000) {
+				if (GetTimer() >= TICKS_TURN) {
 					transition(STATE_WAIT3);
 				}
 				break;
 
 			case STATE_WAIT3:
-				if (GetTimer() >= 18000) {
+				if (GetTimer() >= TICKS_WAIT) {
 					transition(STATE_DRIVE);
 				}
 				break;
@@ -117,25 +122,37 @@ void transition(unsigned char newState) {
 	state = newState;
 }
 
+/**
+ * Sets the motor speed for both motors.
+ */
 void setMotorSpeed(unsigned char speed) {
+	// Approximation for the speed of the left motor
 	speedLeft = speed / 4 * 3;
 	speedRight = speed;
+	// Wait for robot to get up to speed after setting the new speed
 	odometryWait = true;
+	// Reset odometry counters
 	odometryCounterLeft = 0;
 	odometryCounterRight = 0;
+	// Set motor speed
 	MotorSpeed(speedLeft, speedRight);
 }
 
 void updateMotorSpeed() {
+	// One of the motors has speed zero? Then don't run
 	if (speedLeft == 0 || speedRight == 0)
 		return;
 
+	// Read odometry data
 	OdometrieData(odometry);
 
+	// Left sensor is detecting dark while most recent scan revealed bright, or other way around
 	if ((odometry[0] > ODO_THRESHOLD && !odometryDarkLeft) || (odometry[0] <= ODO_THRESHOLD && odometryDarkLeft)) {
+		// Toggle "previous scan result" flag
 		odometryDarkLeft = !odometryDarkLeft;
 		odometryCounterLeft ++;
 	}
+	// Right sensor is detecting dark while most recent scan revealed bright, or other way around
 	if ((odometry[1] > ODO_THRESHOLD && !odometryDarkRight) || (odometry[1] <= ODO_THRESHOLD && odometryDarkRight)) {
 		odometryDarkRight = !odometryDarkRight;
 		odometryCounterRight ++;
